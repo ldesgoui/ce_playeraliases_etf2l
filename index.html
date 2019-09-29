@@ -99,7 +99,7 @@
           }
 
           const promises = Promise.all(ids.map(async id => {
-            const resp = await fetch(`https://api.etf2l.org/team/${id}.json`, {
+            const resp = await fetch(`https://cors-anywhere.herokuapp.com/https://api.etf2l.org/team/${id}.json`, {
               redirect: "follow",
             });
 
