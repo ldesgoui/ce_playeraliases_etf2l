@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8" />
+    <title>ce_playeraliases_etf2l</title>
+    <link
+      href="https://unpkg.com/tailwindcss@1.1.2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="container mx-auto px-2 py-10 bg-gray-100 text-gray-800">
+    <h1 class="mb-8 text-4xl">
+      ce_playeraliases_etf2l
+    </h1>
+
+    <p class="mb-2 text-xl">
+      Paste below the URLs or IDs of ETF2L teams
+    </p>
+
+    <textarea
+      id="input"
+      class="w-full mb-4 p-2 bg-gray-300 font-mono"
+      rows="10"
+    ></textarea>
+
+    <p id="error" class="mb-4 text-red-500 font-semibold"></p>
+
+    <button
+      id="process"
+      class="mb-4 p-2 border rounded bg-gray-200 hover:bg-gray-300 hover:shadow text-gray-700 font-bold uppercase"
+    >
+      Process
+    </button>
+
+    <pre id="output" class="mb-8 p-2 bg-gray-300"></pre>
+
+    <footer
+      class="text-xs font-bold uppercase text-gray-500"
+    >
+      <div class="mb-4 flex justify-between">
+        <a
+          href="https://github.com/ldesgoui/ce_playeraliases_etf2l"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Source
+        </a>
+
+        <a id="copy" href="." download="combine-logs.html">
+          Copy
+        </a>
+      </div>
+
+      <pre class="whitespace-pre-line font-normal">
+        Copyright (C) 2019 ldesgoui
+
+        Permission is hereby granted, free of charge, to any person obtaining
+        a copy of this software and associated documentation files (the
+        "Software"), to deal in the Software without restriction, including
+        without limitation the rights to use, copy, modify, merge, publish,
+        distribute, sublicense, and/or sell copies of the Software, and to
+        permit persons to whom the Software is furnished to do so, subject to
+        the following conditions:
+
+        The above copyright notice and this permission notice shall be
+        
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+        EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+        NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+        LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+        OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+        WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+      </pre>
+    </footer>
+
+    <script src="https://unpkg.com/jszip@3.2.2/dist/jszip.min.js"></script>
+    <script>
+      (() => {
+        const re = /\b(\d+)\b/g;
+        const inputEl = document.getElementById("input");
+        const processEl = document.getElementById("process");
+        const outputEl = document.getElementById("output");
+        const errorEl = document.getElementById("error");
+        const copyEl = document.getElementById("copy");
+
+        copyEl.setAttribute("href", location.href);
+
+        processEl.addEventListener("click", async ev => {
+          errorEl.innerText = "";
+
+          const ids = [...inputEl.value.matchAll(re) || []].map(match => match[1]);
+
+          if (ids.length < 1) {
+            errorEl.innerText = "Input contains no IDs";
+            return;
+          }
+
+          const promises = Promise.all(ids.map(async id => {
+            const resp = await fetch(`http://api.etf2l.org/team/${id}.json`);
+
+            if (!resp.ok) {
+              errorEl.innerText += `fail: ${id}\n`;
+              return "";
+            }
+
+            const data = await resp.json()
+            
+            if (!data.team.players) {
+              errorEl.innerText += `etf2l did not return a player list: ${id}\n`;
+              return "";
+            }
+
+            return Object.values(data.team.players)
+              .map(player => `ce_playeraliases_add ${player.steam.id64} "${player.name}"\n`)
+              .join("")
+          }));
+
+          output.innerText = (await promises).join("")
+        })
+      })();
+    </script>
+  </body>
+</html>
