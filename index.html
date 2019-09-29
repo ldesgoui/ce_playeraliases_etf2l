@@ -104,7 +104,7 @@
             });
 
             if (!resp.ok) {
-              errorEl.innerText += `fail: ${id}\n`;
+              errorEl.innerText += `error: ${id}: ${(await resp.json()).status.message}\n`;
               return "";
             }
 
