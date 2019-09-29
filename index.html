@@ -99,7 +99,7 @@
           }
 
           const promises = Promise.all(ids.map(async id => {
-            const resp = await fetch(`http://api.etf2l.org/team/${id}.json`);
+            const resp = await fetch(`https://api.etf2l.org/team/${id}.json`);
 
             if (!resp.ok) {
               errorEl.innerText += `fail: ${id}\n`;
