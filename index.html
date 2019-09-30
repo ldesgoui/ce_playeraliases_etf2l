@@ -35,9 +35,7 @@
 
     <pre id="output" class="mb-8 p-2 bg-gray-300"></pre>
 
-    <footer
-      class="text-xs font-bold uppercase text-gray-500"
-    >
+    <footer class="text-xs font-bold uppercase text-gray-500">
       <div class="mb-4 flex justify-between">
         <a
           href="https://github.com/ldesgoui/ce_playeraliases_etf2l"
@@ -78,51 +76,55 @@
 
     <script src="https://unpkg.com/jszip@3.2.2/dist/jszip.min.js"></script>
     <script>
-      (() => {
-        const re = /\b(\d+)\b/g;
-        const inputEl = document.getElementById("input");
-        const processEl = document.getElementById("process");
-        const outputEl = document.getElementById("output");
-        const errorEl = document.getElementById("error");
-        const copyEl = document.getElementById("copy");
+      ;(() => {
+        const re = /\b(\d+)\b/g
+        const inputEl = document.getElementById("input")
+        const processEl = document.getElementById("process")
+        const outputEl = document.getElementById("output")
+        const errorEl = document.getElementById("error")
+        const copyEl = document.getElementById("copy")
 
-        copyEl.setAttribute("href", location.href);
+        copyEl.setAttribute("href", location.href)
 
         processEl.addEventListener("click", async ev => {
-          errorEl.innerText = "";
+          errorEl.innerText = ""
 
-          const ids = [...inputEl.value.matchAll(re) || []].map(match => match[1]);
+          const ids = [...(inputEl.value.matchAll(re) || [])].map(
+            match => match[1]
+          )
 
           if (ids.length < 1) {
-            errorEl.innerText = "Input contains no IDs";
-            return;
+            errorEl.innerText = "Input contains no IDs"
+            return ""
           }
 
-          const promises = Promise.all(ids.map(async id => {
-            const resp = await fetch(`https://cors-anywhere.herokuapp.com/https://api.etf2l.org/team/${id}.json`, {
-              redirect: "follow",
-            });
+          const promises = Promise.all(
+            ids.map(async id => {
+              const resp = await fetch(
+                `https://cors-anywhere.herokuapp.com/https://api.etf2l.org/team/${id}.json`
+              )
 
-            if (!resp.ok) {
-              errorEl.innerText += `error: ${id}: ${(await resp.json()).status.message}\n`;
-              return "";
-            }
+              const data = await resp.json()
 
-            const data = await resp.json()
-            
-            if (!data.team.players) {
-              errorEl.innerText += `etf2l did not return a player list: ${id}\n`;
-              return "";
-            }
+              if (!resp.ok) {
+                errorEl.innerText += `error: ${id}: ${data.status.message}\n`
+                return ""
+              }
 
-            return Object.values(data.team.players)
-              .map(player => `ce_playeraliases_add ${player.steam.id64} "${player.name}"\n`)
-              .join("")
-          }));
+              if (!data.team.players) {
+                errorEl.innerText += `etf2l did not return a player list: ${id}\n`
+                return ""
+              }
 
-          output.innerText = (await promises).join("")
+              return Object.values(data.team.players)
+                .map(p => `ce_playeraliases_add ${p.steam.id64} "${p.name}"`)
+                .join("\n")
+            })
+          )
+
+          output.innerText = (await promises).join("\n")
         })
-      })();
+      })()
     </script>
   </body>
 </html>
