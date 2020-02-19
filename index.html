@@ -34,6 +34,7 @@
     </button>
 
     <pre id="output" class="mb-8 p-2 bg-gray-300"></pre>
+    <pre id="output-remove" class="mb-8 p-2 bg-gray-300"></pre>
 
     <footer class="text-xs font-bold uppercase text-gray-500">
       <div class="mb-4 flex justify-between">
@@ -81,6 +82,7 @@
         const inputEl = document.getElementById("input")
         const processEl = document.getElementById("process")
         const outputEl = document.getElementById("output")
+        const outputRemoveEl = document.getElementById("output-remove")
         const errorEl = document.getElementById("error")
         const cloneEl = document.getElementById("clone")
 
@@ -116,13 +118,22 @@
                 return ""
               }
 
-              return Object.values(data.team.players)
+              let add = Object.values(data.team.players)
                 .map(p => `ce_playeraliases_add ${p.steam.id64} "${p.name}"`)
                 .join("\n")
+
+              let remove = Object.values(data.team.players)
+                .map(p => `ce_playeraliases_remove ${p.steam.id64}`)
+                .join("\n")
+
+              return [add, remove]
             })
           )
 
-          output.innerText = (await promises).join("\n")
+          let results = await promises
+
+          outputEl.innerText = results.map(x => x[0]).join("\n")
+          outputRemoveEl.innerText = results.map(x => x[1]).join("\n")
         })
       })()
     </script>
