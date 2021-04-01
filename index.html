@@ -119,7 +119,7 @@
               }
 
               let add = Object.values(data.team.players)
-                .map(p => `ce_playeraliases_add ${p.steam.id64} "${p.name};"`)
+                .map(p => `ce_playeraliases_add ${p.steam.id64} "${p.name}";`)
                 .join("\n")
 
               let remove = Object.values(data.team.players)
